@@ -11,17 +11,23 @@ async function main() {
   const client = new MongoClient(url);
   await client.connect();
 
-  const results = await circulatonRepo.loadData(data);
+  try {
+    const results = await circulatonRepo.loadData(data);
+    assert.equal(data.length, results.insertedCount);
 
-  assert.equal(data.length, results.insertedCount);
+    const getData = await circulatonRepo.get();
+    assert.equal(data.length, getData.length);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    //   console.log(results.insertedCount, results.ops);
+    const admin = client.db(dbName).admin();
+    //   console.log(await admin.serverStatus());
+    await client.db(dbName).dropDatabase();
+    console.log(await admin.listDatabases());
 
-  //   console.log(results.insertedCount, results.ops);
-  const admin = client.db(dbName).admin();
-  //   console.log(await admin.serverStatus());
-  await client.db(dbName).dropDatabase();
-  console.log(await admin.listDatabases());
-
-  client.close();
+    client.close();
+  }
 }
 
 main();

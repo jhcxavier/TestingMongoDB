@@ -17,6 +17,14 @@ async function main() {
 
     const getData = await circulatonRepo.get();
     assert.equal(data.length, getData.length);
+
+    const filterData = await circulatonRepo.get({
+      Newspaper: getData[4].Newspaper,
+    });
+    assert.deepEqual(filterData[0], getData[4]);
+
+    const limitData = await circulatonRepo.get({}, 3);
+    assert.equal(limitData.length, 3);
   } catch (error) {
     console.log(error);
   } finally {

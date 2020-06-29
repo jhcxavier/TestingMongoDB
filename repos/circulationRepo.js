@@ -134,6 +134,51 @@ function circulationRepo() {
       }
     });
   }
+  function avarageFinalistByChange() {
+    return new Promise(async (resolve, reject) => {
+      const client = new MongoClient(url);
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+
+        const avarage = await db
+          .collection("newspapers")
+          //$project allows you to modify the content of an object
+          .aggregate([
+            {
+              $project: {
+                Newspaper: 1,
+                "Pulitzer Prize Winners and Finalists, 1990-2014": 1,
+                "Change in Daily Circulation, 2004-2013": 1,
+                overallChange: {
+                  $cond: {
+                    if: {
+                      $gte: ["$Change in Daily Circulation, 2004-2013", 0],
+                    },
+                    then: "positive",
+                    else: "negative",
+                  },
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$overallChange",
+                avgFinal: {
+                  $avg: "$Pulitzer Prize Winners and Finalists, 1990-2014",
+                },
+              },
+            },
+          ])
+          .toArray();
+
+        resolve(avarage);
+        client.close();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
   return {
     loadData,
     get,
@@ -142,6 +187,7 @@ function circulationRepo() {
     update,
     remove,
     avarageFinalist,
+    avarageFinalistByChange,
   };
 }
 

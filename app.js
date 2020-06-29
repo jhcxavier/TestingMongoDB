@@ -13,12 +13,15 @@ async function main() {
   await client.connect();
 
   try {
+    //Load data to the DB
     const results = await circulatonRepo.loadData(data);
     assert.equal(data.length, results.insertedCount);
 
+    //Get Data
     const getData = await circulatonRepo.get();
     assert.equal(data.length, getData.length);
 
+    //Filtering Data
     const filterData = await circulatonRepo.get({
       Newspaper: getData[4].Newspaper,
     });
@@ -31,6 +34,7 @@ async function main() {
     const byId = await circulatonRepo.getById(id);
     assert.deepEqual(byId, getData[4]);
 
+    //adding a new Item
     const newItem = {
       Newspaper: "New Paper",
       "Daily Circulation, 2004": 100,
@@ -45,6 +49,7 @@ async function main() {
     const addedItemQUery = await circulatonRepo.getById(addedItem._id);
     assert.deepEqual(addedItemQUery, newItem);
 
+    //Update existing Item
     const updatedItem = await circulatonRepo.update(addedItem._id, {
       Newspaper: "My new Paper",
       "Daily Circulation, 2004": 100,
@@ -59,13 +64,19 @@ async function main() {
     const newAddedItemQuery = await circulationRepo.getById(addedItem._id);
     assert.equal(newAddedItemQuery.Newspaper, "My new Paper");
 
+    //Delete Item
     const removed = await circulationRepo.remove(addedItem._id);
     assert(removed);
     const deletedItem = await circulatonRepo.getById(addedItem._id);
     assert.equal(deletedItem, null);
 
+    //Get Avarage using Aggregation
     const avgFinal = await circulationRepo.avarageFinalist();
     console.log("avarage finalists is: ", avgFinal);
+
+    //Get Avarage by Change
+    const avarageByChange = await circulationRepo.avarageFinalistByChange();
+    console.log(avarageByChange);
   } catch (error) {
     console.log(error);
   } finally {

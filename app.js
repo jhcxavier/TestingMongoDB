@@ -63,13 +63,16 @@ async function main() {
     assert(removed);
     const deletedItem = await circulatonRepo.getById(addedItem._id);
     assert.equal(deletedItem, null);
+
+    const avgFinalists = await circulationRepo.avarageFinalist();
+    console.log("avarage finalist is: ", avgFinalists);
   } catch (error) {
     console.log(error);
   } finally {
     //   console.log(results.insertedCount, results.ops);
     const admin = client.db(dbName).admin();
     //   console.log(await admin.serverStatus());
-    await client.db(dbName).dropDatabase();
+    // await client.db(dbName).dropDatabase();
     console.log(await admin.listDatabases());
 
     client.close();

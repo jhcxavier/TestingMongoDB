@@ -106,6 +106,31 @@ function circulationRepo() {
       }
     });
   }
+  function avarageFinalist() {
+    return new Promise(async (resolve, reject) => {
+      const client = new MongoClient(url);
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+
+        const avarage = await db.collection("newspaper").aggregate([
+          {
+            $group: {
+              _id: null,
+              avgFinalist: {
+                $avg: "$Pulitzer Prize Winners and Finalists, 1990-2014",
+              },
+            },
+          },
+        ]);
+
+        resolve(avarage.toArray()[0].avgFinalist);
+        client.close();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
   return {
     loadData,
     get,
@@ -113,6 +138,7 @@ function circulationRepo() {
     add,
     update,
     remove,
+    avarageFinalist,
   };
 }
 

@@ -113,18 +113,21 @@ function circulationRepo() {
         await client.connect();
         const db = client.db(dbName);
 
-        const avarage = await db.collection("newspaper").aggregate([
-          {
-            $group: {
-              _id: null,
-              avgFinalist: {
-                $avg: "$Pulitzer Prize Winners and Finalists, 1990-2014",
+        const avarage = await db
+          .collection("newspapers")
+          .aggregate([
+            {
+              $group: {
+                _id: null,
+                avgFinal: {
+                  $avg: "$Pulitzer Prize Winners and Finalists, 1990-2014",
+                },
               },
             },
-          },
-        ]);
+          ])
+          .toArray();
 
-        resolve(avarage.toArray()[0].avgFinalist);
+        resolve(avarage[0].avgFinal);
         client.close();
       } catch (error) {
         reject(error);

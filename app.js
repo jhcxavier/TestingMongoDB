@@ -3,6 +3,7 @@ const assert = require("assert");
 
 const circulatonRepo = require("./repos/circulationRepo");
 const data = require("./circulation.json");
+const circulationRepo = require("./repos/circulationRepo");
 
 const url = "mongodb://localhost:27017";
 const dbName = "circulation";
@@ -27,8 +28,41 @@ async function main() {
     assert.equal(limitData.length, 3);
 
     const id = getData[4]._id.toString();
-    const byId = await circulatonRepo.getById(getData[4]._id);
+    const byId = await circulatonRepo.getById(id);
     assert.deepEqual(byId, getData[4]);
+
+    const newItem = {
+      Newspaper: "New Paper",
+      "Daily Circulation, 2004": 100,
+      "Daily Circulation, 2013": 100,
+      "Change in Daily Circulation, 2004-2013": 1,
+      "Pulitzer Prize Winners and Finalists, 1990-2003": 0,
+      "Pulitzer Prize Winners and Finalists, 2004-2014": 0,
+      "Pulitzer Prize Winners and Finalists, 1990-2014": 0,
+    };
+    const addedItem = await circulatonRepo.add(newItem);
+    assert(addedItem._id);
+    const addedItemQUery = await circulatonRepo.getById(addedItem._id);
+    assert.deepEqual(addedItemQUery, newItem);
+
+    const updatedItem = await circulatonRepo.update(addedItem._id, {
+      Newspaper: "My new Paper",
+      "Daily Circulation, 2004": 100,
+      "Daily Circulation, 2013": 100,
+      "Change in Daily Circulation, 2004-2013": 1,
+      "Pulitzer Prize Winners and Finalists, 1990-2003": 0,
+      "Pulitzer Prize Winners and Finalists, 2004-2014": 0,
+      "Pulitzer Prize Winners and Finalists, 1990-2014": 0,
+    });
+    assert.equal(updatedItem.Newspaper, "My new Paper");
+
+    const newAddedItemQuery = await circulationRepo.getById(addedItem._id);
+    assert.equal(newAddedItemQuery.Newspaper, "My new Paper");
+
+    const removed = await circulationRepo.remove(addedItem._id);
+    assert(removed);
+    const deletedItem = await circulatonRepo.getById(addedItem._id);
+    assert.equal(deletedItem, null);
   } catch (error) {
     console.log(error);
   } finally {
